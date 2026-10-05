@@ -10,7 +10,7 @@ async function startServer() {
         server.listen(port, (error) => {
             if (error){
                 console.log(colors.bgRed.bold(`Couldn't start the server on port ${port}`))
-                console.log(error)
+                console.error(error)
                 process.exit(1)
             }
             console.log(colors.bgGreen.bold(`Listening on port ${port}`))
