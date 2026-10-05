@@ -1,4 +1,9 @@
+import express from 'express'
 
-export function sum() {
-    return 2 + 2 
-}
+const server = express()
+
+server.get('/', (req, res) => {
+    res.send('Hello World')
+})
+
+export default server

@@ -1,3 +1,8 @@
-import { sum } from "./server";
+import server from "./server";
 
-console.log(sum())
+const port = process.env.PORT || 4000
+
+server.listen(port, () => {
+    console.log(`Listening in port ${port}`)
+})
+
