@@ -8,7 +8,9 @@
         "target": "esnext",
         "strict": true,
         "sourceMap": true,
-        "skipLibCheck": true
+        "skipLibCheck": true,
+        "experimentalDecorators": true,
+        "emitDecoratorMetadata": true
     },
     "include": ["src"]
 }
