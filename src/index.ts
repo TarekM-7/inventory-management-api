@@ -16,6 +16,7 @@ async function startServer() {
         })
     } catch (error) {
         console.error(error)
+        console.log(colors.bgRed.bold('Failed to start the server'))
         process.exit(1)
     }
 }
