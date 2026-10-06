@@ -1,31 +1,25 @@
-import { Router } from "express";
-import { createProduct, deleteProduct, getProductById, getProducts, updateProduct } from "./handlers/product";
-import { idValidator, productValidator } from "./validators/product";
-import { handleInputErrors, validateProductExists } from "./middleware";
-import { paginationValidation } from "./validators/pagination";
+import { Router } from "express"
+import {
+    createProduct,
+    deleteProduct,
+    getProductById,
+    getProducts,
+    updateProduct
+} from "./handlers/product"
+import { idValidator, productValidator } from "./validators/product"
+import { handleInputErrors, validateProductExists } from "./middleware"
+import { paginationValidation } from "./validators/pagination"
 
 const router = Router()
 
-router.get('/', 
-    paginationValidation,
-    handleInputErrors,
-    getProducts
-)
+router.get("/", paginationValidation, handleInputErrors, getProducts)
 
-router.get('/:id',
-    idValidator,
-    handleInputErrors,
-    validateProductExists,
-    getProductById
-)
+router.get("/:id", idValidator, handleInputErrors, validateProductExists, getProductById)
 
-router.post('/',
-    productValidator,
-    handleInputErrors,
-    createProduct
-)
+router.post("/", productValidator, handleInputErrors, createProduct)
 
-router.put('/:id', 
+router.put(
+    "/:id",
     idValidator,
     productValidator,
     handleInputErrors,
@@ -33,11 +27,6 @@ router.put('/:id',
     updateProduct
 )
 
-router.delete('/:id', 
-    idValidator,
-    handleInputErrors,
-    validateProductExists,
-    deleteProduct
-)
+router.delete("/:id", idValidator, handleInputErrors, validateProductExists, deleteProduct)
 
 export default router

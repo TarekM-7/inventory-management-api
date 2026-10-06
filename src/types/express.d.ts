@@ -1,4 +1,4 @@
-import Product from '../models/Product.model'
+import Product from "../models/Product.model"
 
 declare global {
     namespace Express {
