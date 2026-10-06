@@ -1,5 +1,6 @@
 import { ErrorRequestHandler, RequestHandler } from "express";
 import { validationResult } from "express-validator";
+import { UniqueConstraintError } from "sequelize";
 
 export const handleInputErrors: RequestHandler = (req, res, next) => {
     const errors = validationResult(req)
@@ -13,6 +14,10 @@ export const handleInputErrors: RequestHandler = (req, res, next) => {
 
 export const handleErrors: ErrorRequestHandler = (err, req, res, next) => {
     console.error(err)
+
+    if(err instanceof UniqueConstraintError){
+        return res.status(409).json({ errors: [{ msg: 'Code already exists', path: 'code' }] })
+    }
 
     const status = err.status || 500
     const message = status === 500 ? 'Internal server error' : err.message
