@@ -7,7 +7,10 @@ export const handleInputErrors: RequestHandler = (req, res, next) => {
     const errors = validationResult(req)
     if (!errors.isEmpty()) {
         return res.status(400).json({
-            errors: errors.array()
+            errors: errors.array().map(error => ({ 
+                msg: error.msg,
+                path: error.type === 'field' ? error.path : undefined
+            }))
         })
     }
     next()
