@@ -7,6 +7,7 @@ export const productValidator = [
         .isLength({ max: 100 }).withMessage('Name must be up to 100 characters'),
     body('code')
         .trim()
+        .toUpperCase()
         .notEmpty().withMessage('Code cannot be empty').bail()
         .isLength({ max: 100 }).withMessage('Code must be up to 100 characters'),
     body('stock')
