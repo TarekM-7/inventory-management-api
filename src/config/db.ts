@@ -1,7 +1,10 @@
 import { Sequelize } from "sequelize-typescript";
 import Product from "../models/Product.model";
 
-const db = new Sequelize(process.env.DATABASE_URL!,{
+if (!process.env.DATABASE_URL) {
+    throw new Error('DATABASE_URL is empty or undefined')
+}
+const db = new Sequelize(process.env.DATABASE_URL,{
     models: [Product]
 })
 
