@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createProduct, getProductById, getProducts } from "./handlers/product";
+import { createProduct, getProductById, getProducts, updateProduct } from "./handlers/product";
 import { idValidator, productValidator } from "./validators/product";
 import { handleInputErrors, validateProductExists } from "./middleware";
 
@@ -22,9 +22,13 @@ router.post('/',
     createProduct
 )
 
-router.put('/', (req, res) => {
-    res.json({msg: 'From PUT Products'})
-})
+router.put('/:id', 
+    idValidator,
+    productValidator,
+    handleInputErrors,
+    validateProductExists,
+    updateProduct
+)
 
 router.patch('/', (req, res) => {
     res.json({msg: 'From PATCH Products'})

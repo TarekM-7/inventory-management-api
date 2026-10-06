@@ -21,3 +21,9 @@ export const createProduct: RequestHandler = async (req, res) => {
         data: product
     })
 }
+
+export const updateProduct: RequestHandler<{id: string}> = async (req, res) => {
+    const { name, code } = req.body
+    await req.product!.update({ name, code })
+    res.json({ data: req.product })
+}
