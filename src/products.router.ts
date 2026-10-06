@@ -30,10 +30,6 @@ router.put('/:id',
     updateProduct
 )
 
-router.patch('/', (req, res) => {
-    res.json({msg: 'From PATCH Products'})
-})
-
 router.delete('/', (req, res) => {
     res.json({msg: 'From DELETE Products'})
 })
