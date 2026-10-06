@@ -2,10 +2,13 @@ import { Router } from "express";
 import { createProduct, deleteProduct, getProductById, getProducts, updateProduct } from "./handlers/product";
 import { idValidator, productValidator } from "./validators/product";
 import { handleInputErrors, validateProductExists } from "./middleware";
+import { paginationValidation } from "./validators/pagination";
 
 const router = Router()
 
 router.get('/', 
+    paginationValidation,
+    handleInputErrors,
     getProducts
 )
 

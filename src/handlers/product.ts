@@ -1,12 +1,24 @@
 import { RequestHandler } from "express";
 import Product from "../models/Product.model";
+import { matchedData } from "express-validator";
 
 export const getProducts: RequestHandler = async (req, res) => {
-    const products = await Product.findAll({
-        order: [['createdAt', 'DESC'], ['id', 'DESC']]
+    const { page = 1, limit = 20 } = matchedData(req)
+    const offset = (page - 1) * limit
+
+    const { count, rows } = await Product.findAndCountAll({
+        order: [['createdAt', 'DESC'], ['id', 'DESC']],
+        limit,
+        offset
     })
     res.json({
-        data: products
+        data: rows,
+        meta: {
+            page,
+            limit,
+            total: count,
+            totalPages: Math.ceil(count / limit)
+        }
     })
 }
 
