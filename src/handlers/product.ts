@@ -27,3 +27,8 @@ export const updateProduct: RequestHandler<{id: string}> = async (req, res) => {
     await req.product!.update({ name, code })
     res.json({ data: req.product })
 }
+
+export const deleteProduct: RequestHandler<{id: string}> = async (req, res) => {
+    await req.product!.destroy()
+    res.status(204).end()
+}

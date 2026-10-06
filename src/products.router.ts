@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { createProduct, getProductById, getProducts, updateProduct } from "./handlers/product";
+import { createProduct, deleteProduct, getProductById, getProducts, updateProduct } from "./handlers/product";
 import { idValidator, productValidator } from "./validators/product";
 import { handleInputErrors, validateProductExists } from "./middleware";
 
@@ -30,8 +30,11 @@ router.put('/:id',
     updateProduct
 )
 
-router.delete('/', (req, res) => {
-    res.json({msg: 'From DELETE Products'})
-})
+router.delete('/:id', 
+    idValidator,
+    handleInputErrors,
+    validateProductExists,
+    deleteProduct
+)
 
 export default router
