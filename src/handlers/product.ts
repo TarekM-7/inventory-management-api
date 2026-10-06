@@ -10,6 +10,10 @@ export const getProducts: RequestHandler = async (req, res) => {
     })
 }
 
+export const getProductById: RequestHandler<{id: string}> = async (req, res) => {
+    res.json({ data: req.product })
+}
+
 export const createProduct: RequestHandler = async (req, res) => {
     const { name, code, stock } = req.body
     const product = await Product.create({ name, code, stock  })

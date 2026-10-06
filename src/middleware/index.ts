@@ -1,6 +1,7 @@
 import { ErrorRequestHandler, RequestHandler } from "express";
 import { validationResult } from "express-validator";
 import { UniqueConstraintError } from "sequelize";
+import Product from "../models/Product.model";
 
 export const handleInputErrors: RequestHandler = (req, res, next) => {
     const errors = validationResult(req)
@@ -27,4 +28,13 @@ export const handleErrors: ErrorRequestHandler = (err, req, res, next) => {
 
 export const notFound: RequestHandler = (req, res) => {
     res.status(404).json({ errors: [{ msg: 'Route not found' }] })
+}
+
+export const validateProductExists: RequestHandler<{id: string}> = async (req, res, next) => {
+    const product = await Product.findByPk(req.params.id) 
+    if (!product){
+        return res.status(404).json({ errors: [{ msg: 'Product not found' }] })
+    }
+    req.product = product
+    next()
 }
