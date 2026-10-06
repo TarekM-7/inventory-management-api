@@ -3,7 +3,7 @@ import { query } from "express-validator";
 export const paginationValidation = [
     query('page')
         .optional()
-        .isInt({ min: 1 }).withMessage('Page must be an integer greater than 0')
+        .isInt({ min: 1, max: 1000000 }).withMessage('Page must be an integer from 1 to 1,000,000')
         .toInt(),
     query('limit')
         .optional()
