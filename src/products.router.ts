@@ -1,5 +1,7 @@
 import { Router } from "express";
 import { createProduct } from "./handlers/product";
+import { productValidator } from "./validators/product";
+import { handleInputErrors } from "./middleware";
 
 const router = Router()
 
@@ -7,7 +9,9 @@ router.get('/', (req, res) => {
     res.json({msg: 'From GET Products'})
 })
 
-router.post('/', 
+router.post('/',
+    productValidator,
+    handleInputErrors,
     createProduct
 )
 
