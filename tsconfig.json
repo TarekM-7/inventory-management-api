@@ -2,7 +2,7 @@
     "compilerOptions": {
         "outDir": "./dist",
         "rootDir": "./src",
-        "types": ["node"],
+        "types": ["node", "jest"],
         "lib": ["ESNext"],
         "module": "nodenext",
         "target": "esnext",
