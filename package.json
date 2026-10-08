@@ -13,8 +13,8 @@
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "start": "node dist/index.js",
-    "format": "prettier --write src",
-    "format:check": "prettier --check src"
+    "format": "prettier --write .",
+    "format:check": "prettier --check ."
   },
   "allowScripts": {
     "esbuild@0.28.2": true
