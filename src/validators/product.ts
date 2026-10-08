@@ -2,6 +2,12 @@ import { body, param } from "express-validator"
 
 export const productValidator = [
     body("name")
+        .exists()
+        .withMessage("Name is required")
+        .bail()
+        .isString()
+        .withMessage("Name must be a string")
+        .bail()
         .trim()
         .notEmpty()
         .withMessage("Name cannot be empty")
@@ -9,6 +15,12 @@ export const productValidator = [
         .isLength({ max: 100 })
         .withMessage("Name must be up to 100 characters"),
     body("code")
+        .exists()
+        .withMessage("Code is required")
+        .bail()
+        .isString()
+        .withMessage("Code must be a string")
+        .bail()
         .trim()
         .toUpperCase()
         .notEmpty()
