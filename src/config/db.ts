@@ -5,7 +5,8 @@ if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is empty or undefined. Add a valid DATABASE_URL to the .env file")
 }
 const db = new Sequelize(process.env.DATABASE_URL, {
-    models: [Product]
+    models: [Product],
+    logging: process.env.NODE_ENV === "test" ? false : console.log
 })
 
 export default db
