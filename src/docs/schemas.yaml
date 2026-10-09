@@ -1,0 +1,43 @@
+components:
+    schemas:
+        Product:
+            type: object
+            properties:
+                id:
+                    type: integer
+                    example: 1
+                name:
+                    type: string
+                    maxLength: 100
+                    example: Tornillo hexagonal M6 x 20 mm acero inoxidable
+                code:
+                    type: string
+                    maxLength: 100
+                    example: HEX-M6X20-INOX
+                stock:
+                    type: integer
+                    minimum: 0
+                    example: 500
+                createdAt:
+                    type: string
+                    format: date-time
+                updatedAt:
+                    type: string
+                    format: date-time
+        Error:
+            type: object
+            properties:
+                msg:
+                    type: string
+                    example: Product not found
+                path:
+                    type: string
+                    description: The field that caused the error, when there is one
+                    example: code
+        ErrorResponse:
+            type: object
+            properties:
+                errors:
+                    type: array
+                    items:
+                        $ref: "#/components/schemas/Error"
