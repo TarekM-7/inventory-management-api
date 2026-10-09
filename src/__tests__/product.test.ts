@@ -201,6 +201,13 @@ describe("PUT /api/products/:id", () => {
 
         expect(res.status).toBe(404)
     })
+
+    it("returns 400 for an invalid id", async () => {
+        const res = await request(server).put("/api/products/abc").send(validProduct)
+
+        expect(res.status).toBe(400)
+        expect(res.body.errors).toEqual([{ msg: "Invalid ID", path: "id" }])
+    })
 })
 
 describe("DELETE /api/products/:id", () => {
@@ -219,5 +226,12 @@ describe("DELETE /api/products/:id", () => {
         const res = await request(server).delete("/api/products/999")
 
         expect(res.status).toBe(404)
+    })
+
+    it("returns 400 for an invalid id", async () => {
+        const res = await request(server).delete("/api/products/abc")
+
+        expect(res.status).toBe(400)
+        expect(res.body.errors).toEqual([{ msg: "Invalid ID", path: "id" }])
     })
 })
