@@ -2,8 +2,8 @@ import express from "express"
 import productsRouter from "./products.router"
 import db from "./config/db"
 import { handleErrors, notFound } from "./middleware"
-import swaggerUi from "swagger-ui-express"
 import colors from "colors"
+import swaggerUi from "swagger-ui-express"
 import swaggerSpec from "./config/swagger"
 
 export async function connectDB() {
