@@ -157,3 +157,48 @@ describe("GET /api/products/:id", () => {
         expect(res.body.errors).toEqual([{ msg: "Invalid ID", path: "id" }])
     })
 })
+
+describe("PUT /api/products/:id", () => {
+    it("updates the name and code", async () => {
+        await request(server).post("/api/products").send(validProduct)
+
+        const res = await request(server)
+            .put("/api/products/1")
+            .send({ name: "Tornillo hexagonal M6 inox", code: "hex-m6x25-inox" })
+
+        expect(res.status).toBe(200)
+        expect(res.body.data).toMatchObject({
+            name: "Tornillo hexagonal M6 inox",
+            code: "HEX-M6X25-INOX"
+        })
+    })
+
+    it("does not change the stock", async () => {
+        await request(server).post("/api/products").send(validProduct)
+
+        await request(server)
+            .put("/api/products/1")
+            .send({ ...validProduct, stock: 1 })
+
+        const res = await request(server).get("/api/products/1")
+
+        expect(res.body.data.stock).toBe(500)
+    })
+
+    it("returns 409 when the new code belongs to another product", async () => {
+        await request(server).post("/api/products").send(validProduct)
+        await request(server).post("/api/products").send({ name: "Another", code: "Another-1" })
+
+        const res = await request(server)
+            .put("/api/products/2")
+            .send({ name: "Another", code: "HEX-M6X20-INOX" })
+
+        expect(res.status).toBe(409)
+    })
+
+    it("returns 404 when it does not exist", async () => {
+        const res = await request(server).put("/api/products/999").send(validProduct)
+
+        expect(res.status).toBe(404)
+    })
+})
