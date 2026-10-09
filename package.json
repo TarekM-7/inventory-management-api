@@ -9,7 +9,7 @@
   "scripts": {
     "test": "jest --runInBand",
     "test:coverage": "jest --runInBand --coverage",
-    "dev": "tsx watch src/index.ts",
+    "dev": "tsx watch --include \"src/docs/*.yaml\" src/index.ts",
     "build": "tsc -p tsconfig.build.json",
     "typecheck": "tsc --noEmit",
     "start": "node dist/index.js",
