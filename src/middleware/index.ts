@@ -16,15 +16,9 @@ export const handleInputErrors: RequestHandler = (req, res, next) => {
     next()
 }
 
-const uniqueErrors: Record<string, { msg: string; path: string }> = {
-    products_code_key: { msg: "Code already exists", path: "code" }
-}
-
 export const handleErrors: ErrorRequestHandler = (err, req, res, next) => {
     if (err instanceof UniqueConstraintError) {
-        const constraint = "constraint" in err.parent ? err.parent.constraint : undefined
-        const known = typeof constraint === "string" ? uniqueErrors[constraint] : undefined
-        return res.status(409).json({ errors: [known ?? { msg: "Value already exists" }] })
+        return res.status(409).json({ errors: [{ msg: "Code already exists", path: "code" }] })
     }
 
     const status = err.status || 500
