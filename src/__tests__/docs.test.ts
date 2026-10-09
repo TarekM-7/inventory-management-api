@@ -1,15 +1,15 @@
+import request from "supertest"
+import server from "../server"
 import db from "../config/db"
 import SwaggerParser from "@apidevtools/swagger-parser"
 import swaggerSpec from "../config/swagger"
-import request from "supertest"
-import server from "../server"
 
 afterAll(async () => {
     await db.close()
 })
 
 describe("API docs", () => {
-    it("is valid OpenAPI document", async () => {
+    it("is a valid OpenAPI document", async () => {
         const docs = await SwaggerParser.validate(JSON.parse(JSON.stringify(swaggerSpec)))
 
         expect(docs.info.title).toBe("Inventory Management API")
