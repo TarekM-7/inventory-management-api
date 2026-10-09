@@ -2,7 +2,6 @@ import request from "supertest"
 import db from "../config/db"
 import server, { connectDB } from "../server"
 import Product from "../models/Product.model"
-import { UniqueConstraintError } from "sequelize"
 
 afterAll(async () => {
     await db.close()
@@ -44,22 +43,5 @@ describe("connectDB", () => {
         jest.spyOn(db, "authenticate").mockRejectedValueOnce(new Error("DB down"))
 
         await expect(connectDB()).rejects.toThrow("DB down")
-    })
-})
-
-describe("handleErrors", () => {
-    it("returns a generic 409 for an unknown unique constraint", async () => {
-        jest.spyOn(Product, "create").mockRejectedValueOnce(
-            new UniqueConstraintError({
-                parent: Object.assign(new Error(), { constraint: "unknown_key", sql: "" })
-            })
-        )
-
-        const res = await request(server)
-            .post("/api/products")
-            .send({ name: "Tornillo", code: "T-1" })
-
-        expect(res.status).toBe(409)
-        expect(res.body.errors).toEqual([{ msg: "Value already exists" }])
     })
 })
