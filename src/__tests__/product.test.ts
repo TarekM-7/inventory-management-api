@@ -202,3 +202,22 @@ describe("PUT /api/products/:id", () => {
         expect(res.status).toBe(404)
     })
 })
+
+describe("DELETE /api/products/:id", () => {
+    it("deletes the product and returns 204", async () => {
+        await request(server).post("/api/products").send(validProduct)
+
+        const res = await request(server).delete("/api/products/1")
+        const after = await request(server).get("/api/products/1")
+
+        expect(res.status).toBe(204)
+        expect(res.body).toEqual({})
+        expect(after.status).toBe(404)
+    })
+
+    it("returns 404 when it does not exist", async () => {
+        const res = await request(server).delete("/api/products/999")
+
+        expect(res.status).toBe(404)
+    })
+})
