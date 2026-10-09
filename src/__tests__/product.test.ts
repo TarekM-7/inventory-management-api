@@ -90,3 +90,70 @@ describe("POST /api/products", () => {
         expect(res.body.data.createdAt).not.toContain("2001")
     })
 })
+
+describe("GET /api/products", () => {
+    it("returns an empty list with its meta", async () => {
+        const res = await request(server).get("/api/products")
+
+        expect(res.status).toBe(200)
+        expect(res.body).toEqual({
+            data: [],
+            meta: { page: 1, limit: 20, total: 0, totalPages: 0 }
+        })
+    })
+
+    it("returns the newest products first", async () => {
+        for (const code of ["A-1", "A-2", "A-3"]) {
+            await request(server).post("/api/products").send({ name: "Tornillo", code })
+        }
+
+        const res = await request(server).get("/api/products")
+
+        expect(res.body.data.map((p: { code: string }) => p.code)).toEqual(["A-3", "A-2", "A-1"])
+    })
+
+    it("paginates with page and limit", async () => {
+        for (let i = 1; i <= 5; i++) {
+            await request(server)
+                .post("/api/products")
+                .send({ name: "Tornillo", code: `P-${i}` })
+        }
+
+        const res = await request(server).get("/api/products?page=2&limit=2")
+
+        expect(res.body.data).toHaveLength(2)
+        expect(res.body.meta).toEqual({ page: 2, limit: 2, total: 5, totalPages: 3 })
+    })
+
+    it("returns 400 for an invalid page", async () => {
+        const res = await request(server).get("/api/products?page=0")
+
+        expect(res.status).toBe(400)
+        expect(res.body.errors[0].path).toBe("page")
+    })
+})
+
+describe("GET /api/products/:id", () => {
+    it("returns the product", async () => {
+        await request(server).post("/api/products").send(validProduct)
+
+        const res = await request(server).get("/api/products/1")
+
+        expect(res.status).toBe(200)
+        expect(res.body.data.code).toBe("HEX-M6X20-INOX")
+    })
+
+    it("returns 404 when it does not exist", async () => {
+        const res = await request(server).get("/api/products/999")
+
+        expect(res.status).toBe(404)
+        expect(res.body.errors).toEqual([{ msg: "Product not found" }])
+    })
+
+    it("returns 400 for an invalid id", async () => {
+        const res = await request(server).get("/api/products/abc")
+
+        expect(res.status).toBe(400)
+        expect(res.body.errors).toEqual([{ msg: "Invalid ID", path: "id" }])
+    })
+})
