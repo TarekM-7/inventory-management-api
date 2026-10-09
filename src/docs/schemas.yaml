@@ -41,3 +41,25 @@ components:
                     type: array
                     items:
                         $ref: "#/components/schemas/Error"
+        ProductInput:
+            type: object
+            required:
+                - name
+                - code
+            properties:
+                name:
+                    type: string
+                    maxLength: 100
+                    example: Tornillo hexagonal M6 x 20 mm acero inoxidable
+                code:
+                    type: string
+                    maxLength: 100
+                    description: Saved trimmed and in uppercase
+                    example: hex-m6x20-inox
+                stock:
+                    type: integer
+                    minimum: 0
+                    maximum: 999999
+                    default: 0
+                    description: Only used when creating; the update ignores it
+                    example: 500
