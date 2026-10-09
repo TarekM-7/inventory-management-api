@@ -17,13 +17,12 @@ export const handleInputErrors: RequestHandler = (req, res, next) => {
 }
 
 export const handleErrors: ErrorRequestHandler = (err, req, res, next) => {
-    console.error(err)
-
     if (err instanceof UniqueConstraintError) {
         return res.status(409).json({ errors: [{ msg: "Code already exists", path: "code" }] })
     }
 
     const status = err.status || 500
+    if (status === 500) console.error(err)
     const message = status === 500 ? "Internal server error" : err.message
 
     res.status(status).json({ errors: [{ msg: message }] })
