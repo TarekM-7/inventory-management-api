@@ -8,7 +8,7 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
-    await Product.truncate({ restartIdentity: true })
+    await Product.truncate({ cascade: true, restartIdentity: true })
 })
 
 afterAll(async () => {
