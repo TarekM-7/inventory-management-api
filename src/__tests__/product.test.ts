@@ -222,6 +222,18 @@ describe("DELETE /api/products/:id", () => {
         expect(after.status).toBe(404)
     })
 
+    it("returns 409 when it has movements", async () => {
+        await request(server).post("/api/products").send(validProduct)
+        await request(server).post("/api/products/1/movements").send({ type: "in", quantity: 5 })
+
+        const res = await request(server).delete("/api/products/1")
+        const after = await request(server).get("/api/products/1")
+
+        expect(res.status).toBe(409)
+        expect(res.body.errors).toEqual([{ msg: "Cannot delete a product with movements" }])
+        expect(after.status).toBe(200)
+    })
+
     it("returns 404 when it does not exist", async () => {
         const res = await request(server).delete("/api/products/999")
 
