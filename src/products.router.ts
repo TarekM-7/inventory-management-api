@@ -9,6 +9,8 @@ import {
 import { idValidator, productValidator } from "./validators/product"
 import { handleInputErrors, validateProductExists } from "./middleware"
 import { paginationValidation } from "./validators/pagination"
+import { movementValidator } from "./validators/movement"
+import { createMovement } from "./handlers/movement"
 
 const router = Router()
 
@@ -28,5 +30,14 @@ router.put(
 )
 
 router.delete("/:id", idValidator, handleInputErrors, validateProductExists, deleteProduct)
+
+router.post(
+    "/:id/movements",
+    idValidator,
+    movementValidator,
+    handleInputErrors,
+    validateProductExists,
+    createMovement
+)
 
 export default router
