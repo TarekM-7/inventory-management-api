@@ -1,4 +1,5 @@
-import { Table, Column, Model, DataType } from "sequelize-typescript"
+import { Table, Column, Model, DataType, HasMany } from "sequelize-typescript"
+import Movement from "./Movement.model"
 
 @Table({
     tableName: "products"
@@ -23,6 +24,9 @@ class Product extends Model {
         defaultValue: 0
     })
     declare stock: number
+
+    @HasMany(() => Movement, { onDelete: "RESTRICT" })
+    declare movements: Movement[]
 }
 
 export default Product

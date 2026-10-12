@@ -1,11 +1,12 @@
 import { Sequelize } from "sequelize-typescript"
 import Product from "../models/Product.model"
+import Movement from "../models/Movement.model"
 
 if (!process.env.DATABASE_URL) {
     throw new Error("DATABASE_URL is empty or undefined. Add a valid DATABASE_URL to the .env file")
 }
 const db = new Sequelize(process.env.DATABASE_URL, {
-    models: [Product],
+    models: [Product, Movement],
     logging: process.env.NODE_ENV === "test" ? false : console.log
 })
 
