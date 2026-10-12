@@ -54,6 +54,7 @@ paths:
                                 $ref: "#/components/schemas/ErrorResponse"
         post:
             summary: Create a product
+            description: The stock starts at 0 and only changes with movements. If it is sent, it is ignored.
             tags:
                 - Products
             requestBody:

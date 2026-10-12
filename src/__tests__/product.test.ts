@@ -15,13 +15,13 @@ afterAll(async () => {
     await db.close()
 })
 
-const validProduct = { name: "Tornillo hexagonal M6", code: "HEX-M6X20-INOX", stock: 500 }
+const validProduct = { name: "Tornillo hexagonal M6", code: "HEX-M6X20-INOX" }
 
 describe("POST /api/products", () => {
     it("creates a product and returns 201", async () => {
         const res = await request(server)
             .post("/api/products")
-            .send({ name: "Tornillo hexagonal M6", code: "HEX-M6X20-INOX", stock: 500 })
+            .send({ name: "Tornillo hexagonal M6", code: "HEX-M6X20-INOX" })
 
         expect(res.status).toBe(201)
         expect(res.body.data).toHaveProperty("id")
@@ -46,13 +46,13 @@ describe("POST /api/products", () => {
         expect(res.body.errors[0].path).toBe("name")
     })
 
-    it("rejects a negative stock", async () => {
+    it("ignores the stock it receives", async () => {
         const res = await request(server)
             .post("/api/products")
-            .send({ ...validProduct, stock: -5 })
+            .send({ ...validProduct, stock: 500 })
 
-        expect(res.status).toBe(400)
-        expect(res.body.errors[0].path).toBe("stock")
+        expect(res.status).toBe(201)
+        expect(res.body.data.stock).toBe(0)
     })
 
     it("defaults stock to 0", async () => {
@@ -182,7 +182,7 @@ describe("PUT /api/products/:id", () => {
 
         const res = await request(server).get("/api/products/1")
 
-        expect(res.body.data.stock).toBe(500)
+        expect(res.body.data.stock).toBe(0)
     })
 
     it("returns 409 when the new code belongs to another product", async () => {

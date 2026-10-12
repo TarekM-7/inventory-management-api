@@ -56,10 +56,3 @@ components:
                     maxLength: 100
                     description: Saved trimmed and in uppercase
                     example: hex-m6x20-inox
-                stock:
-                    type: integer
-                    minimum: 0
-                    maximum: 999999
-                    default: 0
-                    description: Only used when creating; the update ignores it
-                    example: 500

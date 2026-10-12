@@ -30,8 +30,8 @@ export const getProductById: RequestHandler<{ id: string }> = async (req, res) =
 }
 
 export const createProduct: RequestHandler = async (req, res) => {
-    const { name, code, stock } = req.body
-    const product = await Product.create({ name, code, stock })
+    const { name, code } = req.body
+    const product = await Product.create({ name, code })
     res.status(201).json({
         data: product
     })
