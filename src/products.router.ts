@@ -10,7 +10,7 @@ import { idValidator, productValidator } from "./validators/product"
 import { handleInputErrors, validateProductExists } from "./middleware"
 import { paginationValidation } from "./validators/pagination"
 import { movementValidator } from "./validators/movement"
-import { createMovement } from "./handlers/movement"
+import { createMovement, getProductMovements } from "./handlers/movement"
 
 const router = Router()
 
@@ -38,6 +38,15 @@ router.post(
     handleInputErrors,
     validateProductExists,
     createMovement
+)
+
+router.get(
+    "/:id/movements",
+    idValidator,
+    paginationValidation,
+    handleInputErrors,
+    validateProductExists,
+    getProductMovements
 )
 
 export default router
