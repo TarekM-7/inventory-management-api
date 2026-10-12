@@ -1,6 +1,7 @@
 import { RequestHandler } from "express"
 import Product from "../models/Product.model"
 import { matchedData } from "express-validator"
+import Movement from "../models/Movement.model"
 
 export const getProducts: RequestHandler = async (req, res) => {
     const { page = 1, limit = 20 } = matchedData(req)
@@ -44,6 +45,11 @@ export const updateProduct: RequestHandler<{ id: string }> = async (req, res) =>
 }
 
 export const deleteProduct: RequestHandler<{ id: string }> = async (req, res) => {
+    const movements = await Movement.count({ where: { productId: req.product!.id } })
+    if (movements > 0) {
+        return res.status(409).json({ errors: [{ msg: "Cannot delete a product with movements" }] })
+    }
+
     await req.product!.destroy()
     res.status(204).end()
 }
