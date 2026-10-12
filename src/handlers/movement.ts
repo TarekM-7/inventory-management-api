@@ -51,3 +51,38 @@ export const getProductMovements: RequestHandler<{ id: string }> = async (req, r
         }
     })
 }
+
+export const getMovements: RequestHandler = async (req, res) => {
+    const { page = 1, limit = 20 } = matchedData(req)
+    const offset = (page - 1) * limit
+
+    const { count, rows } = await Movement.findAndCountAll({
+        include: [{ model: Product, attributes: ["id", "name", "code"] }],
+        order: [
+            ["createdAt", "DESC"],
+            ["id", "DESC"]
+        ],
+        limit,
+        offset
+    })
+    res.json({
+        data: rows,
+        meta: {
+            page,
+            limit,
+            total: count,
+            totalPages: Math.ceil(count / limit)
+        }
+    })
+}
+
+export const getMovementById: RequestHandler<{ id: string }> = async (req, res) => {
+    const movement = await Movement.findByPk(req.params.id, {
+        include: [{ model: Product, attributes: ["id", "name", "code"] }]
+    })
+    if (!movement) {
+        return res.status(404).json({ errors: [{ msg: "Movement not found" }] })
+    }
+
+    res.json({ data: movement })
+}

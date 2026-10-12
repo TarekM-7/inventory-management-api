@@ -1,5 +1,6 @@
 import express from "express"
 import productsRouter from "./products.router"
+import movementsRouter from "./movements.router"
 import db from "./config/db"
 import { handleErrors, notFound } from "./middleware"
 import colors from "colors"
@@ -17,6 +18,7 @@ const server = express()
 server.use(express.json())
 
 server.use("/api/products", productsRouter)
+server.use("/api/movements", movementsRouter)
 server.use("/docs", swaggerUi.serve, swaggerUi.setup(swaggerSpec))
 
 server.use(notFound)
