@@ -5,12 +5,12 @@ import {
     getProductById,
     getProducts,
     updateProduct
-} from "./handlers/product"
-import { idValidator, productValidator } from "./validators/product"
-import { handleInputErrors, validateProductExists } from "./middleware"
-import { paginationValidation } from "./validators/pagination"
-import { movementValidator } from "./validators/movement"
-import { createMovement, getProductMovements } from "./handlers/movement"
+} from "../handlers/product"
+import { idValidator, productValidator } from "../validators/product"
+import { handleInputErrors, validateProductExists } from "../middleware"
+import { paginationValidation } from "../validators/pagination"
+import { movementValidator } from "../validators/movement"
+import { createMovement, getProductMovements } from "../handlers/movement"
 
 const router = Router()
 

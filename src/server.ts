@@ -1,6 +1,6 @@
 import express from "express"
-import productsRouter from "./products.router"
-import movementsRouter from "./movements.router"
+import productsRouter from "./routes/products.router"
+import movementsRouter from "./routes/movements.router"
 import db from "./config/db"
 import { handleErrors, notFound } from "./middleware"
 import colors from "colors"
