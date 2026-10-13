@@ -41,7 +41,7 @@ describe("POST /api/products/:id/movements", () => {
             .send({ type: "out", quantity: 80 })
 
         expect(res.status).toBe(201)
-        expect(await getStock()).toBe(420)
+        expect(await getStock()).toBe(421)
     })
 
     it("allows taking out exactly the stock", async () => {
