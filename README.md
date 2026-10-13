@@ -1,5 +1,7 @@
 # Inventory Management API – Node.js, Express, TypeScript and PostgreSQL
 
+[![CI](https://github.com/TarekM-7/inventory-management-api/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TarekM-7/inventory-management-api/actions/workflows/ci.yml)
+
 A REST API to manage a screw inventory, built with **Node.js**, **Express 5** and **TypeScript**. It stores the products and every stock entry and exit in **PostgreSQL** through **Sequelize**, keeps the stock and its history in sync with transactions, validates every request, answers every error in JSON, documents itself with **Swagger**, and is covered by integration tests written with **Jest** and **Supertest**.
 
 This is a practice project I built after the REST API section of the Udemy course [React de Principiante a Experto](https://www.udemy.com/course/react-de-principiante-a-experto-creando-mas-de-10-aplicaciones/). It repeats the pattern of the course's product API with a different domain, the screws stock at a manufacturing plant, so I could build an API on my own and question each decision instead of copying it.
