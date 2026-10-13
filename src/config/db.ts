@@ -7,7 +7,7 @@ if (!process.env.DATABASE_URL) {
 }
 const db = new Sequelize(process.env.DATABASE_URL, {
     models: [Product, Movement],
-    logging: process.env.NODE_ENV === "test" ? false : console.log
+    logging: process.env.NODE_ENV === "development" ? console.log : false
 })
 
 export default db
