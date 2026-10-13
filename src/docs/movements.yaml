@@ -1,0 +1,145 @@
+paths:
+    /api/products/{id}/movements:
+        parameters:
+            - name: id
+              in: path
+              required: true
+              description: The product id
+              schema:
+                  type: integer
+                  minimum: 1
+        get:
+            summary: List the movements of a product, newest first
+            tags:
+                - Movements
+            parameters:
+                - $ref: "#/components/parameters/Page"
+                - $ref: "#/components/parameters/Limit"
+            responses:
+                200:
+                    description: A page of the product movements
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/Movement"
+                                    meta:
+                                        $ref: "#/components/schemas/PaginationMeta"
+                400:
+                    description: Invalid id, page or limit
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                404:
+                    description: Product not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+        post:
+            summary: Register a stock entry or exit
+            description: The stock changes by the quantity. The movement and the stock are saved together or not at all.
+            tags:
+                - Movements
+            requestBody:
+                required: true
+                content:
+                    application/json:
+                        schema:
+                            $ref: "#/components/schemas/MovementInput"
+            responses:
+                201:
+                    description: The registered movement
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        $ref: "#/components/schemas/Movement"
+                400:
+                    description: Invalid id or data
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                404:
+                    description: Product not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                409:
+                    description: The exit is greater than the stock
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+    /api/movements:
+        get:
+            summary: List every movement, newest first
+            tags:
+                - Movements
+            parameters:
+                - $ref: "#/components/parameters/Page"
+                - $ref: "#/components/parameters/Limit"
+            responses:
+                200:
+                    description: A page of movements, each with its product
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        type: array
+                                        items:
+                                            $ref: "#/components/schemas/MovementWithProduct"
+                                    meta:
+                                        $ref: "#/components/schemas/PaginationMeta"
+                400:
+                    description: Invalid page or limit
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+    /api/movements/{id}:
+        parameters:
+            - name: id
+              in: path
+              required: true
+              description: The movement id
+              schema:
+                  type: integer
+                  minimum: 1
+        get:
+            summary: Get a movement by id
+            tags:
+                - Movements
+            responses:
+                200:
+                    description: The movement with its product
+                    content:
+                        application/json:
+                            schema:
+                                type: object
+                                properties:
+                                    data:
+                                        $ref: "#/components/schemas/MovementWithProduct"
+                400:
+                    description: Invalid id
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"
+                404:
+                    description: Movement not found
+                    content:
+                        application/json:
+                            schema:
+                                $ref: "#/components/schemas/ErrorResponse"

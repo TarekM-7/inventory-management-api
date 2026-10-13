@@ -5,20 +5,8 @@ paths:
             tags:
                 - Products
             parameters:
-                - name: page
-                  in: query
-                  schema:
-                      type: integer
-                      minimum: 1
-                      maximum: 1000000
-                      default: 1
-                - name: limit
-                  in: query
-                  schema:
-                      type: integer
-                      minimum: 1
-                      maximum: 100
-                      default: 20
+                - $ref: "#/components/parameters/Page"
+                - $ref: "#/components/parameters/Limit"
             responses:
                 200:
                     description: A page of products
@@ -32,20 +20,7 @@ paths:
                                         items:
                                             $ref: "#/components/schemas/Product"
                                     meta:
-                                        type: object
-                                        properties:
-                                            page:
-                                                type: integer
-                                                example: 1
-                                            limit:
-                                                type: integer
-                                                example: 20
-                                            total:
-                                                type: integer
-                                                example: 100
-                                            totalPages:
-                                                type: integer
-                                                example: 5
+                                        $ref: "#/components/schemas/PaginationMeta"
                 400:
                     description: Invalid page or limit
                     content:

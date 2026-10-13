@@ -18,7 +18,13 @@ describe("API docs", () => {
     it("documents every route", async () => {
         const docs = await SwaggerParser.validate(JSON.parse(JSON.stringify(swaggerSpec)))
 
-        expect(Object.keys(docs.paths ?? {})).toEqual(["/api/products", "/api/products/{id}"])
+        expect(Object.keys(docs.paths ?? {}).sort()).toEqual([
+            "/api/movements",
+            "/api/movements/{id}",
+            "/api/products",
+            "/api/products/{id}",
+            "/api/products/{id}/movements"
+        ])
     })
 
     it("serves the docs page at /docs", async () => {
