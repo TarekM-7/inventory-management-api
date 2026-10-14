@@ -2,7 +2,8 @@ import { Table, Column, DataType, Model, ForeignKey, BelongsTo } from "sequelize
 import Product from "./Product.model"
 
 @Table({
-    tableName: "movements"
+    tableName: "movements",
+    indexes: [{ name: "movements_product_id", fields: ["productId"] }]
 })
 class Movement extends Model {
     @ForeignKey(() => Product)
