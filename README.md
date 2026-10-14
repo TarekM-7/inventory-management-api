@@ -2,7 +2,7 @@
 
 [![CI](https://github.com/TarekM-7/inventory-management-api/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/TarekM-7/inventory-management-api/actions/workflows/ci.yml)
 
-A REST API to manage a screw inventory, built with **Node.js**, **Express 5** and **TypeScript**. It stores the products and every stock entry and exit in **PostgreSQL** through **Sequelize**, keeps the stock and its history in sync with transactions, validates every request, answers every error in JSON, documents itself with **Swagger**, and is covered by integration tests written with **Jest** and **Supertest**.
+A REST API to manage a screw inventory, built with **Node.js**, **Express 5** and **TypeScript**. It stores the products and every stock entry and exit in **PostgreSQL** through **Sequelize**, keeps the stock and its history in sync with transactions, validates every request, answers every error in JSON, documents itself with **Swagger**, and is covered by integration tests written with **Jest** and **Supertest**. **GitHub Actions** checks every push, and the production copy runs on a Windows PC under **PM2**.
 
 This is a practice project I built after the REST API section of the Udemy course [React de Principiante a Experto](https://www.udemy.com/course/react-de-principiante-a-experto-creando-mas-de-10-aplicaciones/). It repeats the pattern of the course's product API with a different domain, the screws stock at a manufacturing plant, so I could build an API on my own and question each decision instead of copying it.
 
@@ -21,6 +21,8 @@ This is a practice project I built after the REST API section of the Udemy cours
 - The server refuses to start without a database or a `DATABASE_URL`, with a clear message.
 - Interactive API documentation with Swagger UI at `/docs`.
 - 51 integration tests that cover every endpoint, every documented status code, the transaction, the lock and the docs themselves, on a separate test database.
+- Continuous integration: every push to `main` and every pull request runs the format check, the type check, the 51 tests against a fresh PostgreSQL and the build.
+- A production setup for a Windows PC: its own folder, database, port and `.env`, kept alive by PM2, started again when the user logs in, and updated with one command.
 
 ## Tech Stack
 
@@ -32,6 +34,7 @@ This is a practice project I built after the REST API section of the Udemy cours
 - [dotenv](https://github.com/motdotla/dotenv) and [colors](https://github.com/Marak/colors.js)
 - [Jest](https://jestjs.io/), [@swc/jest](https://swc.rs/docs/usage/jest) and [Supertest](https://github.com/ladjs/supertest) for testing, and [swagger-parser](https://apitools.dev/swagger-parser/) to validate the docs
 - [tsx](https://tsx.is/) to run TypeScript in development, and [Prettier](https://prettier.io/) for formatting
+- [GitHub Actions](https://docs.github.com/actions) for continuous integration, and [PM2](https://pm2.keymetrics.io/) to run the API in production
 
 ## How It Works
 
@@ -81,9 +84,27 @@ Request
 
 When the server starts, it connects to the database and creates the `products` and `movements` tables if they do not exist yet. The movements reference their product with a foreign key set to `ON DELETE RESTRICT`, so the database itself refuses to delete a product with history, even outside the API. The Swagger docs are written as YAML files in `src/docs/`, separate from the routers, so the routes stay readable.
 
+### From a commit to production
+
+```
+development folder           GitHub Actions                  production folder (~/apps)
+  edit, npm test
+  git commit, git push  ──→  npm ci
+                             format:check, typecheck
+                             npm test  ← PostgreSQL 18 service,
+                             npm run build   deleted after the run
+                             ✅ green           ──→  git pull, npm ci, npm run build
+                                                     pm2 restart inventory-api
+```
+
+A change only reaches production through GitHub, and only after the CI passes. The production copy is a separate clone with its own database, port (`4100`) and `.env` with `NODE_ENV=production`, so nothing done in the development folder can break it. SQL queries are logged only when `NODE_ENV=development`, so a forgotten value leaves production quiet instead of noisy.
+
 ## Project Structure
 
 ```
+.github/
+└── workflows/
+    └── ci.yml                # Format, types, tests against a PostgreSQL service, and build
 src/
 ├── __tests__/
 │   ├── docs.test.ts          # The docs are valid OpenAPI, list every route and /docs is served
@@ -134,6 +155,8 @@ src/
 - **Choosing tools that fit.** `ts-jest` does not support TypeScript 7, so Jest uses `@swc/jest`, which only translates the code; `npm run typecheck` still checks the types of the tests.
 - **Mocks.** `jest.spyOn(...).mockRejectedValueOnce(...)` makes the database fail on purpose, to test the `500`, the connection error and the rollback of a movement without stopping PostgreSQL.
 - **Proving that a test can fail.** I broke the code on purpose to check each test. Ten simultaneous exits passed even without the lock, because the race depends on timing, so a second test spies on `findByPk` to check that the lock is requested. I also learned that a test without an `expect` always passes.
+- **A green CI is not always a tested CI.** Once, a missing `- run: npm test` line left its `env` attached to the type check step: the run was green and no test had run. Since then I read the test step in the log, and I watched the CI fail on purpose in a pull request before trusting it.
+- **Production is a different folder, not a different command.** Running production from the development folder means any edit, build or `npm ci` can break it, so it lives in its own clone and only changes with `git pull`. On Windows, `pm2 startup` is not supported, so a script in the Startup folder runs `pm2 resurrect` when the user logs in.
 - **Documentation that tells the truth.** OpenAPI in YAML fails silently: a missing colon, a misspelled `$ref` or `schema` instead of `schemas` still let the server start. A test validates the docs with swagger-parser, and every documented status code has a test that proves it.
 
 ## Getting Started
@@ -153,7 +176,7 @@ Requirements: [Node.js](https://nodejs.org/) 24 and [PostgreSQL](https://www.pos
     - `iemsa_inventory_management`
     - `iemsa_inventory_management_test`
 
-3. Copy `.env.example` to `.env` and **replace every value** with your own connection data:
+3. Copy `.env.example` to `.env` and **replace the connection data** with your own. Keep `NODE_ENV=development`, so the SQL queries are logged:
 
     ```bash
     cp .env.example .env
@@ -181,6 +204,44 @@ npm start               # Run the compiled build
 ```
 
 > The tests drop and recreate the tables of the database in `.env.test`. They refuse to run if its name does not end in `_test`, so your development data is safe.
+
+### Running in production
+
+Production runs from its own clone, with its own database and port. The commands are for Git Bash; [PM2](https://pm2.keymetrics.io/) is installed once with `npm install -g pm2`.
+
+1. Create an empty production database, for example `iemsa_inventory_management_prod`.
+2. Clone the repository into its own folder and build it:
+
+    ```bash
+    mkdir -p ~/apps && cd ~/apps
+    git clone https://github.com/TarekM-7/inventory-management-api.git
+    cd inventory-management-api
+    npm ci
+    npm run build
+    ```
+
+3. Create its `.env` with the production database, `PORT=4100` and `NODE_ENV=production`.
+4. Start it with PM2 from that folder, and save the process list:
+
+    ```bash
+    pm2 start dist/index.js --name inventory-api
+    pm2 save
+    ```
+
+5. To start it again when you log in to Windows, put a `pm2-resurrect.cmd` file with these two lines in the Startup folder (`Win+R` → `shell:startup`):
+
+    ```
+    @echo off
+    pm2 resurrect
+    ```
+
+To update it after a push, once the CI is green:
+
+```bash
+cd ~/apps/inventory-management-api && git pull && npm ci && npm run build && pm2 restart inventory-api
+```
+
+`&&` stops at the first command that fails, so a failed build never restarts the API. `db.sync()` does not change existing tables, so a change to a model needs a migration before it reaches production.
 
 ## Acknowledgements
 
