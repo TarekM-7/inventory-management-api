@@ -9,7 +9,6 @@ import swaggerSpec from "./config/swagger"
 
 export async function connectDB() {
     await db.authenticate()
-    await db.sync()
     console.log(colors.bgGreen.bold("Connected to DB"))
 }
 
