@@ -1,0 +1,6 @@
+require("dotenv").config({ quiet: true })
+
+module.exports = {
+    config: "sequelize.config.js",
+    "migrations-path": "migrations"
+}
