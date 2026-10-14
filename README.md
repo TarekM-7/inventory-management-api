@@ -23,6 +23,8 @@ This is a practice project I built after the REST API section of the Udemy cours
 - 51 integration tests that cover every endpoint, every documented status code, the transaction, the lock and the docs themselves, on a separate test database.
 - Continuous integration: every push to `main` and every pull request runs the format check, the type check, the 51 tests against a fresh PostgreSQL and the build.
 - A production setup for a Windows PC: its own folder, database, port and `.env`, kept alive by PM2, started again when the user logs in, and updated with one command.
+- Migrations with `sequelize-cli`: tables change without losing data, and `movements.productId` has an index for each product's history.
+- A daily backup of the production database, keeping the last 14 days, with a tested restore.
 
 ## Tech Stack
 
@@ -34,6 +36,7 @@ This is a practice project I built after the REST API section of the Udemy cours
 - [dotenv](https://github.com/motdotla/dotenv) and [colors](https://github.com/Marak/colors.js)
 - [Jest](https://jestjs.io/), [@swc/jest](https://swc.rs/docs/usage/jest) and [Supertest](https://github.com/ladjs/supertest) for testing, and [swagger-parser](https://apitools.dev/swagger-parser/) to validate the docs
 - [tsx](https://tsx.is/) to run TypeScript in development, and [Prettier](https://prettier.io/) for formatting
+- [sequelize-cli](https://github.com/sequelize/cli) for migrations
 - [GitHub Actions](https://docs.github.com/actions) for continuous integration, and [PM2](https://pm2.keymetrics.io/) to run the API in production
 
 ## How It Works
@@ -82,7 +85,7 @@ Request
   └─ handleErrors        → 409 for a repeated code, 500 for anything else
 ```
 
-When the server starts, it connects to the database and creates the `products` and `movements` tables if they do not exist yet. The movements reference their product with a foreign key set to `ON DELETE RESTRICT`, so the database itself refuses to delete a product with history, even outside the API. The Swagger docs are written as YAML files in `src/docs/`, separate from the routers, so the routes stay readable.
+The tables are created and changed by migrations in `migrations/`, applied with `npm run migrate`; the server only connects when it starts. The tests still build their own tables from the models, and the CI checks that both give exactly the same structure. The movements reference their product with a foreign key set to `ON DELETE RESTRICT`, so the database itself refuses to delete a product with history, even outside the API. The Swagger docs are written as YAML files in `src/docs/`, separate from the routers, so the routes stay readable.
 
 ### From a commit to production
 
@@ -91,9 +94,13 @@ development folder           GitHub Actions                  production folder (
   edit, npm test
   git commit, git push  ──→  npm ci
                              format:check, typecheck
-                             npm test  ← PostgreSQL 18 service,
-                             npm run build   deleted after the run
-                             ✅ green           ──→  git pull, npm ci, npm run build
+                             npm run migrate   ← PostgreSQL 18 service,
+                             npm test             deleted after the run
+                             migrations = models?
+                             npm run build
+                             ✅ green           ──→  backup
+                                                     git pull, npm ci, npm run build
+                                                     npm run migrate
                                                      pm2 restart inventory-api
 ```
 
@@ -104,7 +111,12 @@ A change only reaches production through GitHub, and only after the CI passes. T
 ```
 .github/
 └── workflows/
-    └── ci.yml                # Format, types, tests against a PostgreSQL service, and build
+    └── ci.yml                # Format, types, migrations vs models, tests on PostgreSQL, build
+migrations/
+├── …-create-tables.js        # Baseline: products and movements
+└── …-add-movements-product-index.js
+.sequelizerc                  # Where sequelize-cli finds its config and the migrations
+sequelize.config.js           # Migration connection, from DATABASE_URL
 src/
 ├── __tests__/
 │   ├── docs.test.ts          # The docs are valid OpenAPI, list every route and /docs is served
@@ -157,6 +169,8 @@ src/
 - **Proving that a test can fail.** I broke the code on purpose to check each test. Ten simultaneous exits passed even without the lock, because the race depends on timing, so a second test spies on `findByPk` to check that the lock is requested. I also learned that a test without an `expect` always passes.
 - **A green CI is not always a tested CI.** Once, a missing `- run: npm test` line left its `env` attached to the type check step: the run was green and no test had run. Since then I read the test step in the log, and I watched the CI fail on purpose in a pull request before trusting it.
 - **Production is a different folder, not a different command.** Running production from the development folder means any edit, build or `npm ci` can break it, so it lives in its own clone and only changes with `git pull`. On Windows, `pm2 startup` is not supported, so a script in the Startup folder runs `pm2 resurrect` when the user logs in.
+- **From `sync()` to migrations.** `db.sync()` creates missing tables but never changes existing ones, so a model change could not reach production without dropping its data. Now each change is a migration with an `up` and a `down`, and every database keeps a list of the ones it already ran. The first migration recreates the existing tables, and since `createTable` is `CREATE TABLE IF NOT EXISTS`, running it on a database built by `sync()` only records it, which is safe only after checking the structure is identical. A change goes twice, in a migration and in the model, and the CI compares the two.
+- **Backups that were restored at least once.** A daily `pg_dump` runs from the Windows Task Scheduler, and I restored one into a separate database to check that the numbers match. A failed backup used to leave an empty file that looked like a backup, so the script now deletes it and logs the error.
 - **Documentation that tells the truth.** OpenAPI in YAML fails silently: a missing colon, a misspelled `$ref` or `schema` instead of `schemas` still let the server start. A test validates the docs with swagger-parser, and every documented status code has a test that proves it.
 
 ## Getting Started
@@ -184,7 +198,15 @@ Requirements: [Node.js](https://nodejs.org/) 24 and [PostgreSQL](https://www.pos
 
 4. Create `.env.test` with the same `DATABASE_URL`, pointing to the test database.
 
-5. Start the development server:
+5. Create the tables in the development database:
+
+    ```bash
+    npm run migrate
+    ```
+
+    The tests do not need this step: they create their own tables.
+
+6. Start the development server:
 
     ```bash
     npm run dev
@@ -201,6 +223,10 @@ npm run typecheck       # Check the types, tests included
 npm run format          # Format the project with Prettier
 npm run build           # Compile TypeScript to dist/, without the tests
 npm start               # Run the compiled build
+npm run migrate         # Apply the pending migrations to the database in .env
+npm run migrate:status  # List the migrations, applied (up) or pending (down)
+npm run migrate:undo    # Undo the last applied migration
+npm run migration:new -- name   # Create a new migration file in migrations/
 ```
 
 > The tests drop and recreate the tables of the database in `.env.test`. They refuse to run if its name does not end in `_test`, so your development data is safe.
@@ -220,7 +246,12 @@ Production runs from its own clone, with its own database and port. The commands
     npm run build
     ```
 
-3. Create its `.env` with the production database, `PORT=4100` and `NODE_ENV=production`.
+3. Create its `.env` with the production database, `PORT=4100` and `NODE_ENV=production`, and create the tables:
+
+    ```bash
+    npm run migrate
+    ```
+
 4. Start it with PM2 from that folder, and save the process list:
 
     ```bash
@@ -235,13 +266,15 @@ Production runs from its own clone, with its own database and port. The commands
     pm2 resurrect
     ```
 
+6. Back up its database every day: a script at `~/backups/backup-inventory.sh` runs `pg_dump` with the `DATABASE_URL` of the production `.env`, keeps the last 14 days in `~/backups/inventory/`, and is scheduled with the Windows Task Scheduler.
+
 To update it after a push, once the CI is green:
 
 ```bash
-cd ~/apps/inventory-management-api && git pull && npm ci && npm run build && pm2 restart inventory-api
+bash ~/backups/backup-inventory.sh && cd ~/apps/inventory-management-api && git pull && npm ci && npm run build && npm run migrate && pm2 restart inventory-api
 ```
 
-`&&` stops at the first command that fails, so a failed build never restarts the API. `db.sync()` does not change existing tables, so a change to a model needs a migration before it reaches production.
+`&&` stops at the first command that fails, so a failed build or migration never restarts the API. The migrations run before the restart, because the new code may need them, and the backup right before everything is the way back if a migration goes wrong.
 
 ## Acknowledgements
 
